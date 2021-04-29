@@ -13,6 +13,12 @@ class Board:
         # set that keeps track of which locations we've uncovered
         self.dug = set()  # if we dig at 0,0 self.dug = {(0,0)}
 
+    def get_dim_size(self):
+        return self.dim_size
+
+    def set_dug(self, new_set):
+        self.dug = new_set
+
     def make_new_board(self):
         # Empty board
         board = [
@@ -136,7 +142,7 @@ def play(dim_size=10, num_bombs=10):
 
     safe = True
 
-    while len(board.dug) < board.dim_size ** 2 - num_bombs:
+    while len(board.dug) < board.get_dim_size() ** 2 - num_bombs:
         print(board)
         user_input = re.split(
             ",(\\s)*",
@@ -145,14 +151,11 @@ def play(dim_size=10, num_bombs=10):
 
         row, col = int(user_input[0]), int(user_input[-1])
 
-        """
-        Please replace by a get method !!!
-        """
         if (
             row < 0
-            or row >= board.dim_size
+            or row >= board.get_dim_size()
             or col < 0
-            or col >= board.dim_size
+            or col >= board.get_dim_size()
         ):
             print("Invalid location. Try again")
             continue
@@ -169,12 +172,13 @@ def play(dim_size=10, num_bombs=10):
     else:
         print("Sorry, game over :(")
 
-        #### Please replace by a set method !!!!
-        board.dug = [
-            (r, c)
-            for r in range(board.dim_size)
-            for c in range(board.dim_size)
-        ]
+        board.set_dug(
+            [
+                (r, c)
+                for r in range(board.get_dim_size())
+                for c in range(board.get_dim_size())
+            ]
+        )
         print(board)
 
 
