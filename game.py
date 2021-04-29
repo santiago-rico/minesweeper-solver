@@ -1,5 +1,6 @@
 import random
 import re
+from solver import Solver
 
 
 class Board:
@@ -15,6 +16,12 @@ class Board:
 
     def get_dim_size(self):
         return self.dim_size
+
+    def get_dug(self):
+        return self.dug
+
+    def get_num_bombs(self):
+        return num_bombs
 
     def set_dug(self, new_set):
         self.dug = new_set
@@ -90,6 +97,19 @@ class Board:
 
         return True
 
+    def get_visible_board(self):
+        visible_board = [
+            [None for _ in range(self.dim_size)] for _ in range(self.dim_size)
+        ]
+        for row in range(self.dim_size):
+            for col in range(self.dim_size):
+                if (row, col) in self.dug:
+                    visible_board[row][col] = str(self.board[row][col])
+                else:
+                    visible_board[row][col] = " "
+
+        return visible_board
+
     def __str__(self):
         visible_board = [
             [None for _ in range(self.dim_size)] for _ in range(self.dim_size)
@@ -144,10 +164,7 @@ def play(dim_size=10, num_bombs=10):
 
     while len(board.dug) < board.get_dim_size() ** 2 - num_bombs:
         print(board)
-        user_input = re.split(
-            ",(\\s)*",
-            input("Where would you like to dig? Input as row, col: "),
-        )
+        user_input = re.split(",(\\s)*", solver.make_move(board))
 
         row, col = int(user_input[0]), int(user_input[-1])
 
@@ -161,6 +178,7 @@ def play(dim_size=10, num_bombs=10):
             continue
 
         # If it's valid, dig!!
+        print("Move made to: ", "(", row, ",", col, ")")
         safe = board.dig(row, col)
 
         if not safe:
@@ -183,4 +201,5 @@ def play(dim_size=10, num_bombs=10):
 
 
 if __name__ == "__main__":
+    solver = Solver()
     play()
