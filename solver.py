@@ -20,8 +20,13 @@ class Solver:
             col = str(loc % state.get_dim_size())
             move = row, col
             return ",".join(move)
-        else:
+        elif len(self.safe_moves - state.get_dug()) > 0:
             possible_moves = self.safe_moves - state.get_dug()
+            loc = random.choice(list(possible_moves))
+            move = map(str, loc)
+            return ",".join(move)
+        else:
+            possible_moves = self.get_unsafe_options(state)
             loc = random.choice(list(possible_moves))
             move = map(str, loc)
             return ",".join(move)
@@ -44,13 +49,6 @@ class Solver:
 
     def get_safe_moves_set(self, state):
         for row, col in state.get_dug():
-            # if (
-            #     self.num_empty_cells_around(row, col, state)
-            #     == state.get_visible_board()[row][col]
-            # ):
-            #     # You have already found all the mines around this location so go on
-            #     continue
-
             if self.num_empty_cells_around(row, col, state) > int(
                 state.get_visible_board()[row][col]
             ):
@@ -73,6 +71,35 @@ class Solver:
                                 col,
                             ):
                                 self.safe_moves.add((r, c))
+
+    def get_empty_indices(self, row, col, state):
+        empty_indeces = set()
+        for r in range(
+            max(0, row - 1), min(state.get_dim_size() - 1, (row + 1)) + 1
+        ):
+            for c in range(
+                max(0, col - 1), min(state.get_dim_size() - 1, (col + 1)) + 1
+            ):
+                if state.get_visible_board()[r][c] == " ":
+                    empty_indeces.add((r, c))
+        return empty_indeces
+
+    def get_mine_probs(self, row, col, state):
+        if self.num_empty_cells_around(row, col, state) > 0:
+            return int(
+                state.get_visible_board()[row][col]
+            ) / self.num_empty_cells_around(row, col, state)
+
+    def get_unsafe_options(self, state):
+        min_prob = 1
+        min_prob_loc = ()
+        for row, col in state.get_dug():
+            if self.num_empty_cells_around(row, col, state) > 0:
+                mine_prob = self.get_mine_probs(row, col, state)
+                if mine_prob < min_prob:
+                    min_prob = mine_prob
+                    min_prob_loc = row, col
+        return self.get_empty_indices(min_prob_loc[0], min_prob_loc[-1], state)
 
     def num_empty_cells_around(self, row, col, state):
         num_empty_cells_around = 0
